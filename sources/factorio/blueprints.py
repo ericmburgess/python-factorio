@@ -19,13 +19,15 @@ class Blueprint(object):
             the blueprint exchange protocol version.
         data: A mapping containing the blueprint data decoded from the exchange
             string.
-        orig_str: The original exchange string. Optional.
+        exch_str: The original exchange string. Optional.
+        json_str: The originally decoded JSON string. Optional.
     """
 
-    def __init__(self, version_byte, data, orig_str=""):
+    def __init__(self, version_byte, data, exch_str="", json_str=""):
         self.version_byte = version_byte
         self.data = data
-        self.orig_str = orig_str
+        self.exch_str = exch_str
+        self.json_str = json_str
         self.version = self.data["blueprint"]["version"]
         self.entities = self.data["blueprint"]["entities"]
         self.icons = self.data["blueprint"]["icons"]
@@ -53,7 +55,8 @@ def loads(exchange_str):
     decoded = base64.b64decode(exchange_str[1:])
     json_str = zlib.decompress(decoded)
     data = json.loads(json_str, object_pairs_hook=collections.OrderedDict)
-    return Blueprint(version_byte, data, orig_str=exchange_str)
+    return Blueprint(
+        version_byte, data, exch_str=exchange_str, json_str=json_str)
 
 def load(infile):
     """Load a blueprint from a file.
@@ -74,7 +77,8 @@ def dumps(bprint):
 
     Returns: A Factorio exchange string.
     """
-    json_str = json.dumps(bprint.data, separators=(",", ":"))
+    json_str = json.dumps(
+        bprint.data, separators=(",", ":"), ensure_ascii=False).encode("utf8")
     compressed = zlib.compress(json_str, 9)
     encoded = base64.b64encode(compressed)
     return bprint.version_byte + encoded
