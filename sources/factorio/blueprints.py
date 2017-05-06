@@ -1,21 +1,19 @@
 """blueprints.py
-
 Routines for decoding, inspecting, manipulating, and re-encoding Factorio
 blueprints.
 """
 
-import json
-import zlib
 import base64
 import collections
+import json
+import zlib
 
-from copy import deepcopy
 
 class EncodedBlob(object):
     """one Factorio json->gzip->base64 encoded blob"""
 
-    def __init__(self, data = {}, version_byte = None):
-        self.data = data
+    def __init__(self, data=None, version_byte=None):
+        self.data = data or {}
         self.version_byte = version_byte
 
     def __getattr__(self, attr):
@@ -24,12 +22,12 @@ class EncodedBlob(object):
 
     @property
     def data_type(self):
-        (data_type,inner_data) = next(iter(self.data.items()))
+        data_type, _ = next(iter(self.data.items()))
         return data_type
 
     @property
     def inner_data(self):
-        (data_type,inner_data) = next(iter(self.data.items()))
+        _, inner_data = next(iter(self.data.items()))
         return inner_data
 
     @classmethod
@@ -56,7 +54,8 @@ class EncodedBlob(object):
 
     def to_exchange_string(self, **kwargs):
         if self.version_byte is None:
-            raise RuntimeError('Attempted to convert to exchange string with no version_byte')
+            raise RuntimeError(
+				"Attempted to convert to exchange string with no version_byte")
         json_str = self.to_json_string(**kwargs)
         compressed = zlib.compress(json_str, 9)
         encoded = base64.b64encode(compressed)
@@ -66,7 +65,7 @@ class EncodedBlob(object):
         open(filename, "w").write(self.to_exchange_string())
 
     def to_json_string(self, **kwargs):
-        data = self.data.copy();
+        data = self.data.copy()
         if self.version_byte is not None:
             data["version_byte"] = self.version_byte
         json_str = json.dumps(
@@ -112,13 +111,13 @@ class BlueprintBook(EncodedBlob):
     """one Factorio blueprint book, containing zero or more blueprints"""
 
     def __init__(self, *args, **kwargs):
-        super().__init(*args,**kwargs)
+        super(BlueprintBook, self).__init__(*args, **kwargs)
         self.objectify_blueprints()
 
     def objectify_blueprints(self):
         # convert internal blueprint dicts to Blueprint objects
         self.data["blueprint_book"]["blueprints"] = list(map(
-            lambda data: Blueprint(data = data, version_byte = self.version_byte),
+            lambda data: Blueprint(data=data, version_byte=self.version_byte),
             self.data["blueprint_book"]["blueprints"]
         ))
 
@@ -128,12 +127,12 @@ class BlueprintBook(EncodedBlob):
             lambda blueprint: blueprint.data,
             self.data["blueprint_book"]["blueprints"]
         ))
-        json_str = super().to_json_string(**kwargs)
+        json_str = super(BlueprintBook, self).to_json_string(**kwargs)
         self.objectify_blueprints()
         return json_str
 
     def remove_indexes(self):
-        """Remove blueprintbook.data["blueprint_book"]["blueprints"][*]["index"]"""
+        """Remove self.data["blueprint_book"]["blueprints"][*]["index"]"""
         next_number = 0
         for blueprint in self.blueprints:
             number = blueprint.data.pop("index", None)
