@@ -17,7 +17,7 @@ class EncodedBlob(object):
         self.version_byte = version_byte
 
     def __getattr__(self, attr):
-        """Genericly provide access to blueprint.data.blueprint.entities etc"""
+        """Generically provide access to blueprint.data.blueprint.entities etc"""
         return self.inner_data.get(attr)
 
     @property
@@ -55,7 +55,7 @@ class EncodedBlob(object):
     def to_exchange_string(self, **kwargs):
         if self.version_byte is None:
             raise RuntimeError(
-				"Attempted to convert to exchange string with no version_byte")
+		"Attempted to convert to exchange string with no version_byte")
         json_str = self.to_json_string(**kwargs)
         compressed = zlib.compress(json_str, 9)
         encoded = base64.b64encode(compressed)
