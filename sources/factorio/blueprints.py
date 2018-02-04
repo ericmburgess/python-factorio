@@ -173,3 +173,7 @@ class BlueprintBook(EncodedBlob):
         for blueprint in self.blueprints:
             blueprint.data["index"] = number
             number = number + 1
+
+    def add_blueprint(self, in_blueprint):
+        """Add a blueprint to the book"""
+        self.data["blueprint_book"]["blueprints"].append(in_blueprint)
