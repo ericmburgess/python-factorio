@@ -12,9 +12,14 @@ import zlib
 class EncodedBlob(object):
     """one Factorio json->gzip->base64 encoded blob"""
 
-    def __init__(self, data=None, version_byte=None):
-        self.data = data or {}
-        self.version_byte = version_byte
+    def __init__(self, data=None, version_byte='0'):
+        """Default Constructor, that also takes raw data, or acts as a copy constructor"""
+        if issubclass(type(data), EncodedBlob):
+            self.data = data.data.copy()
+            self.version_byte = data.version_byte
+        else:
+            self.data = data or {}
+            self.version_byte = version_byte
 
     def __getattr__(self, attr):
         """Generically provide access to blueprint.data.blueprint.entities etc"""
