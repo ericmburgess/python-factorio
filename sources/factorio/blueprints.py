@@ -96,6 +96,10 @@ class EncodedBlob(object):
     def to_json_file(self, filename, **kwargs):
         open(filename, "w", encoding="utf-8").write(self.to_json_string(**kwargs))
 
+    def set_name(self, new_name):
+        """Set the blueprint/book's name"""
+        self.data[self.data_type]['label'] = new_name
+
 class Blueprint(EncodedBlob):
     """one Factorio blueprint"""
 
