@@ -50,7 +50,7 @@ class EncodedBlob(object):
     def from_exchange_string(cls, exchange_str):
         version_byte = exchange_str[0]
         decoded = base64.b64decode(exchange_str[1:])
-        json_str = zlib.decompress(decoded)
+        json_str = zlib.decompress(decoded).decode("utf8")    #Convert from bytes to str
         data = json.loads(json_str, object_pairs_hook=collections.OrderedDict)
         return cls(data = data, version_byte = version_byte)
 
@@ -66,14 +66,14 @@ class EncodedBlob(object):
 
     @classmethod
     def from_json_file(cls, filename):
-        return cls.from_json_string(open(filename).read().strip())
+        return cls.from_json_string(open(filename, encoding="utf-8").read().strip())
 
     def to_exchange_string(self, **kwargs):
         if self.version_byte is None:
             raise RuntimeError(
 		"Attempted to convert to exchange string with no version_byte")
         json_str = self.to_json_string(**kwargs)
-        compressed = zlib.compress(json_str, 9)
+        compressed = zlib.compress(json_str.encode("utf-8"), 9)
         encoded = base64.b64encode(compressed)
         return self.version_byte + encoded.decode()
 
@@ -88,12 +88,13 @@ class EncodedBlob(object):
             data,
             separators=(",", ":"),
             ensure_ascii=False,
+            indent=2,
             **kwargs
-        ).encode("utf8")
+        )
         return json_str
 
     def to_json_file(self, filename, **kwargs):
-        open(filename, "w").write(self.to_json_string(**kwargs))
+        open(filename, "w", encoding="utf-8").write(self.to_json_string(**kwargs))
 
 class Blueprint(EncodedBlob):
     """one Factorio blueprint"""
