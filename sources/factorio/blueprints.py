@@ -129,6 +129,16 @@ class BlueprintBook(EncodedBlob):
 
     def __init__(self, *args, **kwargs):
         super(BlueprintBook, self).__init__(*args, **kwargs)
+        #Handle creating an empty blueprint book
+        if not self.data:
+            self.data = collections.OrderedDict()
+            self.data["blueprint_book"] = collections.OrderedDict()
+            book=self.data["blueprint_book"]
+            book['item'] = "blueprint-book"
+            book['blueprints'] = []
+            book['active_index'] = 0
+            book['label'] = "Empty Blueprint Book"
+            book['version'] = 0
         self.objectify_blueprints()
 
     def objectify_blueprints(self):
