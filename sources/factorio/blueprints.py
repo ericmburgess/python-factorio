@@ -22,18 +22,29 @@ class EncodedBlob(object):
             self.version_byte = version_byte
 
     def __getattr__(self, attr):
-        """Generically provide access to blueprint.data.blueprint.entities etc"""
+        """
+        Generically provide access to blueprint.data.blueprint.entities etc
+        WARNING:  These are read only, and will silently fail if a user attempts to modify them!
+        """
         return self.inner_data.get(attr)
 
     @property
     def data_type(self):
+        """
+        Factorio blueprints (and books), have a root object, under which everything is nested.
+        This gives the name of that object.
+        """
         data_type, _ = next(iter(self.data.items()))
         return data_type
 
     @property
     def inner_data(self):
-        _, inner_data = next(iter(self.data.items()))
-        return inner_data
+        """
+        Factorio blueprints (and books), have a root object, under which everything is nested.
+        This gives access to everything under that root object without having to know its name.
+        WARNING:  This is a read only copy, and will silently fail if a user attempts to modify it!
+        """
+        return self.data[self.data_type]
 
     @classmethod
     def from_exchange_string(cls, exchange_str):
