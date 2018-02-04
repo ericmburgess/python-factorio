@@ -28,6 +28,10 @@ class EncodedBlob(object):
         """
         return self.inner_data.get(attr)
 
+    def update(self, key, value):
+        """Since getattr is read only, use this to update data"""
+        self.data[self.data_type].update({key:value})
+
     @property
     def data_type(self):
         """
@@ -126,7 +130,6 @@ class Blueprint(EncodedBlob):
             name = ent["name"]
             mats[name] = mats.setdefault(name, 0) + 1
         return mats
-
 
 class BlueprintBook(EncodedBlob):
     """one Factorio blueprint book, containing zero or more blueprints"""
